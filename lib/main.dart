@@ -1,90 +1,72 @@
-// import 'dart:async';
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 
-// void main() {
-//   runApp(MyApp());
-// }
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
-// class TimerController extends GetxController {
-//   RxInt remainingTime = 60.obs; // Reactive integer for the remaining time
-//   RxBool isTimerRunning = true.obs; // Reactive boolean to check if timer is running
-//   late Timer _timer;
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-//   @override
-//   void onInit() {
-//     super.onInit();
-//     _startTimer();
-//   }
+class _HomeScreenState extends State<HomeScreen> {
+  // Track the selected index
+  int? selectedIndex;
 
-//   void _startTimer() {
-//     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-//       if (remainingTime.value > 0) {
-//         remainingTime.value--;
-//       } else {
-//         _timer.cancel();
-//         isTimerRunning.value = false; // Stop the timer and show "Resend"
-//       }
-//     });
-//   }
+  final List<String> testList = ["hi", "Hellow", "testing", "appv bfgvcb vc "];
 
-//   @override
-//   void onClose() {
-//     _timer.cancel(); // Don't forget to cancel the timer when the controller is disposed
-//     super.onClose();
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          SizedBox(height: 100),
+          Container(
+            height: 50, // Adjusted height for better appearance
+            width: 300,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: testList.length,
+              itemBuilder: (context, index) {
+                // Determine color based on whether it's selected
+                Color itemColor =
+                    selectedIndex == index ? Colors.yellow : Colors.green;
 
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: TimerPage(),
-//     );
-//   }
-// }
-
-// class TimerPage extends StatelessWidget {
-//   final TimerController controller = Get.put(TimerController());
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Timer Example'),
-//       ),
-//       body: Center(
-//         child: Obx(() {
-//           return controller.isTimerRunning.value
-//               ? Column(
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     Text(
-//                       'Your time remain: ${controller.remainingTime.value} seconds',
-//                       style: TextStyle(fontSize: 20),
-//                     ),
-//                     SizedBox(height: 20),
-//                     CircularProgressIndicator(), // Show a loading indicator
-//                   ],
-//                 )
-//               : Column(
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     Text(
-//                       'Resend text', // After timer finishes
-//                       style: TextStyle(fontSize: 20, color: Colors.green),
-//                     ),
-//                     SizedBox(height: 20),
-//                     ElevatedButton(
-//                       onPressed: () {
-//                         // Resend action
-//                       },
-//                       child: Text('Resend'),
-//                     ),
-//                   ],
-//                 );
-//         }),
-//       ),
-//     );
-//   }
-// }
+                return Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        selectedIndex = index; // Update the selected index
+                      });
+                    },
+                    child: Container(
+                      height: 40, // Adjusted height for better appearance
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                        color: itemColor, // Apply color based on selection
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Center(
+                          child: Text(
+                            testList[index],
+                            style: TextStyle(
+                              color:
+                                  selectedIndex == index
+                                      ? Colors.black
+                                      : Colors.white,
+                            ), // Adjust text color for better contrast
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
