@@ -1,206 +1,248 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+import 'package:rive/rive.dart';
+
+main() {
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text('Auto Scroll and Focus Example')),
-        body: AutoScrollForm(),
-      ),
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: LoginScreen(),
     );
   }
 }
 
-class AutoScrollForm extends StatefulWidget {
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  _AutoScrollFormState createState() => _AutoScrollFormState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _AutoScrollFormState extends State<AutoScrollForm> {
-  // Focus nodes for each TextField (manually created)
-  final FocusNode _focusNode1 = FocusNode();
-  final FocusNode _focusNode2 = FocusNode();
-  final FocusNode _focusNode3 = FocusNode();
-  final FocusNode _focusNode4 = FocusNode();
-  final FocusNode _focusNode5 = FocusNode();
-  final FocusNode _focusNode6 = FocusNode();
-  final FocusNode _focusNode7 = FocusNode();
-  final FocusNode _focusNode8 = FocusNode();
-  final FocusNode _focusNode9 = FocusNode();
-  final FocusNode _focusNode10 = FocusNode();
+class _LoginScreenState extends State<LoginScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    // Dispose the focus nodes
-    _focusNode1.dispose();
-    _focusNode2.dispose();
-    _focusNode3.dispose();
-    _focusNode4.dispose();
-    _focusNode5.dispose();
-    _focusNode6.dispose();
-    _focusNode7.dispose();
-    _focusNode8.dispose();
-    _focusNode9.dispose();
-    _focusNode10.dispose();
-    super.dispose();
-  }
+  var animationLink = 'assets/animated_login_character.riv';
+  SMIInput<bool>? isChecking;
+  SMIInput<bool>? isHandsUp;
+  SMIInput<bool>? trigSuccess;
+  SMIInput<bool>? trigFail;
+  late StateMachineController? stateMachineController;
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: _scrollController,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              focusNode: _focusNode1,
-              textInputAction: TextInputAction.next,
-              onEditingComplete: () {
-                FocusScope.of(context).requestFocus(_focusNode2);
-                _scrollToNextField();
-              },
-              decoration: InputDecoration(
-                labelText: 'TextField 1',
-                border: OutlineInputBorder(),
+    return Scaffold(
+      backgroundColor: const Color(0xffD6E2EA),
+      appBar: AppBar(
+        title: const Text('Login Page', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xff6C3428),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // if (artBoard != null)
+              SizedBox(
+                height: 350,
+                width: 400,
+                child: RiveAnimation.asset(
+                  animationLink,
+                  fit: BoxFit.fill,
+                  stateMachines: ['Login Machine'],
+                  onInit: (artBoard) {
+                    stateMachineController =
+                        StateMachineController.fromArtboard(
+                          artBoard,
+                          'Login Machine',
+                        );
+                    if (stateMachineController == null) return;
+                    artBoard.addController(stateMachineController!);
+                    isChecking = stateMachineController?.findInput(
+                      'isChecking',
+                    );
+                    isHandsUp = stateMachineController?.findInput('isHandsUp');
+                    trigSuccess = stateMachineController?.findInput(
+                      'trigSuccess',
+                    );
+                    trigFail = stateMachineController?.findInput('trigFail');
+                  },
+                ),
               ),
-            ),
-            SizedBox(height: 8),
-            TextField(
-              focusNode: _focusNode2,
-              textInputAction: TextInputAction.next,
-              onEditingComplete: () {
-                FocusScope.of(context).requestFocus(_focusNode3);
-                _scrollToNextField();
-              },
-              decoration: InputDecoration(
-                labelText: 'TextField 2',
-                border: OutlineInputBorder(),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xff413142),
+                  // color: Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                height: 320.0,
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextFormField(
+                          onChanged: (value) {
+                            if (isHandsUp != null) {
+                              isHandsUp!.change(false);
+                            }
+                            if (isChecking == null) return;
+                            isChecking!.change(true);
+                          },
+                          controller: _usernameController,
+                          decoration: const InputDecoration(
+                            labelStyle: TextStyle(color: Colors.white),
+                            filled: true,
+                            // fillColor: Colors.grey.withOpacity(0.5),
+                            fillColor: Color.fromRGBO(128, 128, 128, 0.5),
+                            labelText: 'Username',
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                              // Border color when focused
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(30.0),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue),
+                              // Border color when not focused
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(30.0),
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.red),
+                              // Border color when not focused
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(30.0),
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.red),
+                              // Border color when not focused
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(30.0),
+                              ),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your username';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16.0),
+                        TextFormField(
+                          onChanged: (value) {
+                            if (isChecking != null) {
+                              isChecking!.change(false);
+                            }
+                            if (isHandsUp == null) return;
+                            isHandsUp!.change(true);
+                          },
+                          controller: _passwordController,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            labelStyle: TextStyle(color: Colors.white),
+                            filled: true,
+                            // fillColor: Colors.grey.withOpacity(0.5),
+                            fillColor: Color.fromRGBO(128, 128, 128, 0.5),
+                            labelText: 'Password',
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                              // Border color when focused
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(30.0),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(30.0),
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.red),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(30.0),
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.red),
+                              // Border color when not focused
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(30.0),
+                              ),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 40.0),
+                        Container(
+                          height: 50.0,
+                          width: 300.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(25.0),
+                            border: Border.all(color: Colors.blue, width: 2.0),
+                            color: Colors.blue,
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                // Perform login logic here
+                                String username = _usernameController.text;
+                                String password = _passwordController.text;
+                                // Add your authentication logic here
+                                print(
+                                  'Logging in: $username with password: $password',
+                                );
+                                isChecking!.change(false);
+                                isHandsUp!.change(false);
+                                trigFail!.change(false);
+                                trigSuccess!.change(true);
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //       builder: (context) => HomeScreen()),
+                                // );
+                              } else {
+                                isChecking!.change(false);
+                                isHandsUp!.change(false);
+                                trigSuccess!.change(false);
+                                trigFail!.change(true);
+                              }
+                            },
+                            child: Text('Login'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-            SizedBox(height: 8),
-            TextField(
-              focusNode: _focusNode3,
-              textInputAction: TextInputAction.next,
-              onEditingComplete: () {
-                FocusScope.of(context).requestFocus(_focusNode4);
-                _scrollToNextField();
-              },
-              decoration: InputDecoration(
-                labelText: 'TextField 3',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 8),
-            TextField(
-              focusNode: _focusNode4,
-              textInputAction: TextInputAction.next,
-              onEditingComplete: () {
-                FocusScope.of(context).requestFocus(_focusNode5);
-                _scrollToNextField();
-              },
-              decoration: InputDecoration(
-                labelText: 'TextField 4',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 8),
-            TextField(
-              focusNode: _focusNode5,
-              textInputAction: TextInputAction.next,
-              onEditingComplete: () {
-                FocusScope.of(context).requestFocus(_focusNode6);
-                _scrollToNextField();
-              },
-              decoration: InputDecoration(
-                labelText: 'TextField 5',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 8),
-            TextField(
-              focusNode: _focusNode6,
-              textInputAction: TextInputAction.next,
-              onEditingComplete: () {
-                FocusScope.of(context).requestFocus(_focusNode7);
-                _scrollToNextField();
-              },
-              decoration: InputDecoration(
-                labelText: 'TextField 6',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 8),
-            TextField(
-              focusNode: _focusNode7,
-              textInputAction: TextInputAction.next,
-              onEditingComplete: () {
-                FocusScope.of(context).requestFocus(_focusNode8);
-                _scrollToNextField();
-              },
-              decoration: InputDecoration(
-                labelText: 'TextField 7',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 8),
-            TextField(
-              focusNode: _focusNode8,
-              textInputAction: TextInputAction.next,
-              onEditingComplete: () {
-                FocusScope.of(context).requestFocus(_focusNode9);
-                _scrollToNextField();
-              },
-              decoration: InputDecoration(
-                labelText: 'TextField 8',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 8),
-            TextField(
-              focusNode: _focusNode9,
-              textInputAction: TextInputAction.next,
-              onEditingComplete: () {
-                FocusScope.of(context).requestFocus(_focusNode10);
-                _scrollToNextField();
-              },
-              decoration: InputDecoration(
-                labelText: 'TextField 9',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 8),
-            TextField(
-              focusNode: _focusNode10,
-              textInputAction: TextInputAction.done,
-              onEditingComplete: () {
-                FocusScope.of(context).unfocus(); // Dismiss keyboard
-              },
-              decoration: InputDecoration(
-                labelText: 'TextField 10',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            ElevatedButton(onPressed: () {}, child: Text("data")),
-          ],
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  void _scrollToNextField() {
-    // Scroll to the next TextField if needed
-    _scrollController.animateTo(
-      _scrollController.offset + 60.0, // Adjust scroll amount as needed
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
     );
   }
 }
